@@ -1,8 +1,12 @@
 Changes
 Homespring.pm
 Homespring/Node.pm
+Homespring/Salmon.pm
+Homespring/Visualise.pm
 Makefile.PL
 MANIFEST
 README
-test.pl
-example.pl
+examples/hello.pl
+examples/visual.pl
+t/op_gen.t
+t/harness.inc
