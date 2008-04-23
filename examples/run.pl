@@ -5,14 +5,15 @@ use strict;
 use Language::Homespring;
 use Data::Dumper;
 
-my $code = "bear hatchery Hello,. World ..\n powers";
+my $filename = $ARGV[0];
+die "please specify a file to read!\n" unless $filename;
+
+open(F, $filename) or die "couldn't read file $filename: $!";
+my $code = join '', <F>;
+close(F);
 
 my $hs = new Language::Homespring();
 $hs->parse($code);
-
-for (1..10){
-	print "------------------------------------\n";
-	print $hs->tick();
-}
+$hs->run(100);
 
 #print Dumper($hs->{root_node}, $hs->{salmon}, $hs->{new_salmon});

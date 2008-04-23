@@ -7,3 +7,11 @@ Revision history for Perl extension Language::Homespring.
 	- added visualiser
 	- added Language::Homepsring::Salmon class
 	- basic implementation of runtime
+
+0.03  Tue Jul	01 2003
+	- added Language::Homespring::River
+	- added Language::Homespring::Snowmelt
+	- moved salmon to rivers instead of nodes
+	- fixed up example scripts
+	- got hello2.hs to work!
+	- add run() method to Language::Homespring

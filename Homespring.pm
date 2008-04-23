@@ -1,12 +1,14 @@
 package Language::Homespring;
 
-$VERSION = 0.02;
+$VERSION = 0.03;
 
 use strict;
 use warnings;
 
 use Language::Homespring::Node;
 use Language::Homespring::Salmon;
+use Language::Homespring::Snowmelt;
+use Language::Homespring::River;
 
 sub new {
 	my $class = shift;
@@ -15,8 +17,11 @@ sub new {
 	my $options = shift;
 	$self->{root_node} = undef;
 	$self->{salmon} = [];
+	$self->{snowmelt} = [];
 	$self->{new_salmon} = [];
+	$self->{dead_salmon} = [];
 	$self->{output} = '';
+	$self->{universe_ok} = 1;
 
 	return $self;	
 }
@@ -46,6 +51,15 @@ sub parse {
 				'parent_node' => $parent,
 			});
 			$parent->add_child($new_node);
+
+			my $new_river = new Language::Homespring::River({
+				'interp' => $self,
+				'up_node' => $new_node,
+				'down_node' => $parent,
+			});
+			$parent->add_river_up($new_river);
+			$new_node->add_river_down($new_river);
+
 			$parent = $new_node;
 		}else{
 			if (defined $parent->{parent_node}){
@@ -61,9 +75,21 @@ sub tick {
 
 	$self->{output} = '';
 
-	#print(('-'x50)."\n");
+	# has our universe been smashed?
+	return if !$self->{universe_ok};
 
 	# process snowmelts
+		@nodes = $self->_get_nodes('snowmelt');
+		for (@nodes){
+			#spawn a new snowmelt
+			my $snowmelt = new Language::Homespring::Snowmelt({'interp' => $self, 'location' => $_});
+			push @{$self->{snowmelt}}, $snowmelt;
+		}		
+		$_->move() for (@{$self->{snowmelt}});
+
+		# has our universe been smashed?
+		return if !$self->{universe_ok};
+	
 
 	# process water
 
@@ -101,6 +127,17 @@ sub tick {
 	# process salmon
 
 		$_->move() for (@{$self->{salmon}});
+
+		# sort out dead salmon
+		@{$self->{salmon}} = grep{
+			my $ok = 1;
+			for my $dead(@{$self->{dead_salmon}}){
+				$ok = 0 if $_ == $dead;
+			}
+			$ok;
+		}@{$self->{salmon}};
+
+		# sort out new salmon
 		push @{$self->{salmon}}, @{$self->{new_salmon}};
 		$self->{new_salmon} = [];
 
@@ -109,20 +146,31 @@ sub tick {
 		@nodes = $self->_get_nodes('hatchery');
 		for (@nodes){
 			if ($_->{power}){
-				my $salmon = new Language::Homespring::Salmon({'interp' => $self,'mature' => 1, 'upstream' => 1, 'location' => $_});
+				my $location = @{$_->{rivers_up}}[0];
+				my $salmon = new Language::Homespring::Salmon({'interp' => $self,'mature' => 1, 'upstream' => 1, 'location' => $location});
 				push @{$self->{salmon}}, $salmon;
 			}
 		}
 
-		@nodes = $self->_get_nodes('bear');
-		for (@nodes){
-			for my $salmon($_->get_salmon()){
-				$salmon->kill() if $salmon->{mature};
-			}
-		}
-	# return
+	#	@nodes = $self->_get_nodes('bear');
+	#	for (@nodes){
+	#		for my $salmon($_->get_salmon()){
+	#			$salmon->kill() if $salmon->{mature};
+	#		}
+	#	}
 
-		return $self->{output};
+	return $self->{output};
+}
+
+sub run{
+	my ($self, $max_ticks) = @_;
+	my $tick = 0;
+	while(1){
+		print $self->tick();
+		$tick++;
+		return if (defined($max_ticks) && ($tick >= $max_ticks));
+		return if !$self->{universe_ok};
+	}
 }
 
 sub _set_all {
@@ -206,7 +254,11 @@ Language::Homespring - Perl interpreter for "Homespring"
   my $hs = new Language::Homespring();
   $hs->parse("bear hatchery Hello,. World ..\n powers");
 
-  print $hs->tick() for (1..100);
+  # run one tick
+  print $hs->tick;
+
+  # run program until it ends or 1000 ticks are reached
+  $hs->run(1000);
 
 =head1 DESCRIPTION
 
@@ -230,6 +282,11 @@ Parses $source into an op-tree, discarding any previous op-tree.
 =item tick()
 
 Executes a single "turn" of the interpreter, returning any output as a scalar.
+
+=item run( $limit )
+
+Executes ticks until the universe is destroyed or the (optional) tick limit is 
+reached. Output is sent to STDOUT;
 
 =back
 

@@ -5,6 +5,8 @@ $VERSION = 0.02;
 use warnings;
 use strict;
 
+my $node_count = 0;
+
 sub new {
 	my $class = shift;
 	my $self = bless {}, $class;
@@ -14,11 +16,13 @@ sub new {
 	$self->{parent_node}	= $options->{parent_node} || undef;
 	$self->{node_name}	= $options->{node_name} || '';
 	$self->{child_nodes}	= [];
+	$self->{rivers_up}	= [];
+	$self->{river_down}	= undef;
 	$self->{power}		= 0;
 	$self->{water}		= 0;
 	$self->{destroyed}	= 0;
 	$self->{spring}		= $self->_is_spring();
-
+	$self->{uid}		= ++$node_count;
 	$self->{depth}		= 0;
 	$self->{node_name_safe}	= $self->_make_safe($options->{node_name});
 
@@ -128,3 +132,21 @@ sub _make_safe {
 
 	return $name;
 }
+
+sub add_river_up {
+	my ($self, $river) = @_;
+	push @{$self->{rivers_up}}, $river;
+}
+
+sub add_river_down {
+	my ($self, $river) = @_;
+	$self->{river_down} = $river;
+}
+
+sub debug {
+	my ($self) = @_;
+	return "node $self->{uid} ($self->{node_name_safe})";
+}
+
+1;
+

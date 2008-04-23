@@ -8,7 +8,7 @@ require "t/harness.inc";
 # Generates electricity for everything downstream of the 'powers' node
 #
  
-ok(test_hs_return("bear hatchery foo  powers", ['','','','','','foo','foo']));
+ok(test_hs_return("bear hatchery foo  powers", ['','','','foo','foo']));
 ok(test_hs_return("bear hatchery foo", ['','','','','','','']));
 
 #
