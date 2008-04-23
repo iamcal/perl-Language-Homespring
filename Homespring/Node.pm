@@ -25,6 +25,7 @@ sub new {
 	$self->{uid}		= ++$node_count;
 	$self->{depth}		= 0;
 	$self->{node_name_safe}	= $self->_make_safe($options->{node_name});
+	$self->{toggle}		= 0;
 
 	# easier to deal with lowercase commands :)
 	$self->{node_name} = lc($self->{node_name}) if (!$self->{spring});
@@ -146,6 +147,12 @@ sub add_river_down {
 sub debug {
 	my ($self) = @_;
 	return "node $self->{uid} ($self->{node_name_safe})";
+}
+
+sub every_other {
+	my ($self) = @_;
+	$self->{toggle} = !$self->{toggle};
+	return $self->{toggle};
 }
 
 1;

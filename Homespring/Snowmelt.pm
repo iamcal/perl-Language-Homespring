@@ -56,6 +56,8 @@ sub smash {
 
 	#print "Smashing up a $node_name...\n";
 
+	$self->{location}->{destroyed} = 1;
+
 	if ($node_name eq 'universe'){
 		$self->{interp}->{universe_ok} = 0;
 	}

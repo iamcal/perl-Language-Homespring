@@ -12,5 +12,10 @@ examples/run.pl
 examples/visual.pl
 examples/hello1.hs
 examples/hello2.hs
-t/op_gen.t
+examples/hi.hs
 t/harness.inc
+t/ops_01_generators.t
+t/ops_02_slowing.t
+t/ops_03_destruction.t
+t/ops_04_blocking.t
+

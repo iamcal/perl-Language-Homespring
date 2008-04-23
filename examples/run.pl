@@ -14,6 +14,7 @@ close(F);
 
 my $hs = new Language::Homespring();
 $hs->parse($code);
-$hs->run(100);
+
+$hs->run(15, "---\n");
 
 #print Dumper($hs->{root_node}, $hs->{salmon}, $hs->{new_salmon});

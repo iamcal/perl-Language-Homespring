@@ -51,9 +51,8 @@ sub move {
 
 	my $node_name = $node_to_pass->{node_name};
 
-	return if (($node_to_pass->{node_name} eq 'marshy')   && ($self->{time_at_node} == 1));
-	return if (($node_to_pass->{node_name} eq 'shallows') && ($self->{mature}) && ($self->{time_at_node} == 1));
-	return if (($node_to_pass->{node_name} eq 'rapids')   && (!$self->{mature}) && ($self->{time_at_node} == 1));
+	return if (($node_to_pass->{node_name} eq 'shallows') && ($self->{mature}) && ($self->{time_in_river} == 1));
+	return if (($node_to_pass->{node_name} eq 'rapids')   && (!$self->{mature}) && ($self->{time_in_river} == 1));
 
 	return if (($node_to_pass->{node_name} eq 'net')     && ($self->{mature}));
 	return if (($node_to_pass->{node_name} eq 'current') && (!$self->{mature}));
@@ -61,6 +60,26 @@ sub move {
 	if (($node_to_pass->{node_name} eq 'bear') && ($self->{mature})){
 		$self->kill();
 		return;
+	}
+
+	if (($node_to_pass->{node_name} eq 'young bear') && ($self->{mature})){
+		if ($node_to_pass->every_other()){
+			$self->kill();
+			return;
+		}
+	}
+
+	if (($node_to_pass->{node_name} eq 'bird') && (!$self->{mature})){
+		$self->kill();
+		return;
+	}
+
+	if (($node_to_pass->{node_name} eq 'force field') && ($node_to_pass->{power})){
+		if ($self->{upstream}){
+			$self->spawn($node_to_pass);
+		}else{
+			return;
+		}
 	}
 
 	##
@@ -91,7 +110,7 @@ sub spawn {
 
 	#print "spawning in river ".$self->{location}->{uid}." from node ".$spring->debug()."\n";
 
-	my $value = ($spring->{spring})?$spring->{node_name}:'UNKNOWN!!';
+	my $value = ($spring->{spring})?$spring->{node_name}:'nameless';
 	my $new_salmon = new Language::Homespring::Salmon({
 		'interp' => $self->{interp},
 		'value' => $value,

@@ -1,6 +1,6 @@
 package Language::Homespring;
 
-$VERSION = 0.03;
+$VERSION = 0.04;
 
 use strict;
 use warnings;
@@ -109,19 +109,22 @@ sub tick {
 
 		# process "powers"
 		@nodes = $self->_get_nodes('powers');
-		# $_->{power} = 'woo' for @nodes; return;
-		$self->_power_downwards($_) for @nodes;
+		for(@nodes){
+			if (!$_->{destroyed}){
+				$self->_power_downwards($_);
+			}
+		}
 
 		# process "hydro power"
 		@nodes = $self->_get_nodes('hydro power');
 		for (@nodes){
-			$self->_power_downwards($_) if $_->{water};
+			$self->_power_downwards($_) if $_->{water} && !$_->{destroyed};
 		}
 
 		# process "power invert"
 		@nodes = $self->_get_nodes('power invert');
 		for (@nodes){
-			$self->_power_downwards($_) if !$_->{power};
+			$self->_power_downwards($_) if !$_->{power} && !$_->{destroyed};
 		}
 
 	# process salmon
@@ -163,10 +166,11 @@ sub tick {
 }
 
 sub run{
-	my ($self, $max_ticks) = @_;
+	my ($self, $max_ticks, $delimit) = @_;
 	my $tick = 0;
 	while(1){
 		print $self->tick();
+		print $delimit if defined($delimit);
 		$tick++;
 		return if (defined($max_ticks) && ($tick >= $max_ticks));
 		return if !$self->{universe_ok};
@@ -289,6 +293,64 @@ Executes ticks until the universe is destroyed or the (optional) tick limit is
 reached. Output is sent to STDOUT;
 
 =back
+
+=head1 NODE OPS
+
+=head2 Supported Node Ops
+
+  powers
+  hydro power
+  power invert
+  marshy
+  shallows
+  rapids
+  bear
+  young bear
+  bird
+  net
+  current
+  insulated
+
+=head2 Partially Supported Node Ops
+
+  force field
+  hatchery
+  snowmelt
+  universe
+
+=head2 Unsupported Node Ops
+
+  upstream killing device
+  bridge
+  waterfall
+  evaporates
+  pump
+  fear
+  lock
+  inverse lock
+  narrows
+  sense
+  switch
+  upstream sense
+  downstream sense
+  range sense
+  range switch
+  young sense
+  young switch
+  young range sense
+  young range switch
+  youth fountain
+  time
+  reverse up
+  reverse down
+  force up
+  force down
+  append down
+  append up
+  clone
+  oblivion
+  spawn
+  split
 
 =head1 AUTHOR
 
